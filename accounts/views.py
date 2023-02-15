@@ -3,7 +3,7 @@ from wsgiref.util import request_uri
 from department.models import Department
 from .forms import CreateDepartment, CreateTicket, UserCreationForm
 from django.shortcuts import render
-from django.contrib import messages , auth
+from django.contrib import messages,auth  
 from django.shortcuts import redirect
 from .models import Account
 from django.contrib.auth.decorators import login_required
@@ -12,24 +12,24 @@ from django.contrib.auth.models import Group
 import random
 from ticket.zenpy import zenpy_client
 import zenpy
-
 from zenpy.lib.api_objects import Ticket, User,CustomField
 # Create your views here.
 
 # @unauthenticated_user
 def login_user(request):
     if request.method == 'POST':
-        field = request.POST.get('field')
+        email = request.POST.get('email')
         password = request.POST.get('password')
-        user = auth.authenticate(email=field,password=password)
+        user = auth.authenticate(email=email,password=password)
         if not user:
             try:
-                user = auth.authenticate(email = Account.objects.get(Phone_Number = field) ,password=password)
-                print(user)
+                user = auth.authenticate(email = Account.objects.get,password=password)
+                print(1111,user)
             except:
                 messages.error(request,"credential wrong")
         if user is not None:
             auth.login(request,user)
+            print(11111)
             return redirect('home')
         else:
             messages.error(request,"credential wrong")
@@ -43,7 +43,7 @@ def logout_user(request):
 
 
 # @login_required(login_url='login')
-@admin_only
+# @admin_only
 def home(request):
     users = Account.objects.all()
     department = Department.objects.all()
@@ -51,16 +51,16 @@ def home(request):
     return render(request,'home.html',context)
 
 
-@login_required(login_url='login')
-@allowed_user(allowed_role=['user'])
-def user_homepage(request):
+# @login_required(login_url='login')
+@allowed_user(allowed_role=['user']) 
+def user_homepage(request): 
     user = Account.objects.filter(email= request.user).values('email','Phone_Number')
     form = CreateTicket(user[0])
     context = {'form':form}
     return render (request,'user_homepage.html',context)
 
 
-@admin_only
+# @admin_only
 def create_user(request):
     form = UserCreationForm(request.POST)
     if request.method == "POST":
@@ -100,7 +100,7 @@ def create_department(request):
 
 
 
-@admin_only
+# @admin_only
 def delete_dep(request,id):
     department = Department.objects.filter(id=id)
     print(department)    
@@ -114,7 +114,7 @@ def delete_dep(request,id):
     return redirect('login')
     
 
-@admin_only
+# @admin_only
 def update_dep(request,id):
     department = Department.objects.filter(id=id).first()
     form = CreateDepartment(instance=department)
